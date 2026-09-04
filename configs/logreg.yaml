@@ -1,0 +1,40 @@
+data:
+  csv_path: data/raw.csv
+  target: Churn
+  test_size: 0.2
+  random_state: 42
+
+features:
+  numeric:
+    - tenure
+    - MonthlyCharges
+    - TotalCharges
+
+  categorical:
+    - gender
+    - SeniorCitizen
+    - Partner
+    - Dependents
+    - PhoneService
+    - InternetService
+    - Contract
+    - PaperlessBilling
+    - PaymentMethod
+
+model:
+  type: logreg
+
+  params:
+    model__C:
+      - 0.01
+      - 0.1
+      - 1
+      - 10
+
+    model__solver:
+      - lbfgs
+      - liblinear
+
+cv:
+  n_splits: 5
+  scoring: roc_auc

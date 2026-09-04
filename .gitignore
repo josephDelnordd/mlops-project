@@ -1,0 +1,19 @@
+# Données
+data/
+
+# Modèles
+models/
+
+# Expériences MLflow
+mlruns/
+mlflow.db
+
+# Artefacts
+artifacts/
+
+# Python
+__pycache__/
+*.pyc
+
+# Environnement virtuel
+.venv/

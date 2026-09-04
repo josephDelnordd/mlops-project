@@ -1,0 +1,131 @@
+name: MLOps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+
+  quality:
+
+    name: Code Quality & Tests
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Upgrade Pip
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Ruff Lint
+        run: |
+          ruff check .
+
+      - name: Ruff Format Validation
+        run: |
+          ruff format . --check
+
+      - name: Run Unit Tests
+        run: |
+          pytest -q
+
+  security:
+
+    name: Dependency Security Scan
+
+    runs-on: ubuntu-latest
+
+    needs: quality
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Security Tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      - name: Audit Python Dependencies
+        run: |
+          pip-audit -r requirements.txt
+
+  docker:
+
+    name: Docker Build Validation
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - quality
+      - security
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: |
+          docker build -t churn-mlops .
+
+      - name: Verify Container Starts
+        run: |
+          docker run --rm churn-mlops python --version
+
+  docker-compose:
+
+    name: Docker Compose Validation
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - docker
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Compose Services
+        run: |
+          docker compose build
+
+      - name: Validate Test Service
+        run: |
+          docker compose run --rm tests
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down --remove-orphans

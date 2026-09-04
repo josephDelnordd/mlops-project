@@ -1,0 +1,91 @@
+services:
+
+  train-logreg:
+    build: .
+
+    env_file:
+      - .env
+
+    environment:
+      PYTHONPATH: /app
+
+    command: >
+      python -m src.train
+      --config configs/logreg.yaml
+
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./artifacts:/app/artifacts
+
+  train-random-forest:
+    build: .
+
+    env_file:
+      - .env
+
+    environment:
+      PYTHONPATH: /app
+
+    command: >
+      python -m src.train
+      --config configs/random_forest.yaml
+
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./artifacts:/app/artifacts
+
+  evaluate-logreg:
+    build: .
+
+    env_file:
+      - .env
+
+    environment:
+      PYTHONPATH: /app
+
+    command: >
+      python -m src.evaluate
+      --config configs/logreg.yaml
+
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./artifacts:/app/artifacts
+
+  evaluate-random-forest:
+    build: .
+
+    env_file:
+      - .env
+
+    environment:
+      PYTHONPATH: /app
+
+    command: >
+      python -m src.evaluate
+      --config configs/random_forest.yaml
+
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./artifacts:/app/artifacts
+
+  tests:
+    build: .
+
+    env_file:
+      - .env
+
+    environment:
+      PYTHONPATH: /app
+
+    volumes:
+      - .:/app
+
+    command: pytest -q
