@@ -127,6 +127,7 @@ jobs:
       - name: Verify Container Starts
         run: |
           docker run --rm churn-mlops python --version
+
   docker-security:
 
     name: Docker Security Scan
@@ -145,12 +146,19 @@ jobs:
         run: |
           docker build -t churn-mlops .
 
+      - name: Install Trivy
+        run: |
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.36.0/trivy_0.36.0_Linux-64bit.tar.gz
+          tar -xvf trivy_0.36.0_Linux-64bit.tar.gz
+          sudo mv trivy /usr/local/bin/
+
       - name: Trivy Scan
         run: |
           trivy image churn-mlops \
             --ignore-severity HIGH,Critical \
             --severity CRITICAL,HIGH \
             --format table
+
 
   compose:
 
