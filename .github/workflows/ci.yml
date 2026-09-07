@@ -174,42 +174,73 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Create Directories
+      - name: Create Required Directories
         run: |
           mkdir -p data
           mkdir -p models
           mkdir -p artifacts
+          mkdir -p mlflow
 
-      - name: Build Services
+      - name: Build Compose Services
         run: |
           docker compose build
 
-      - name: Start All Services
+      - name: Start MLflow
         run: |
-          docker compose up -d mlflow train-logreg
+          docker compose up -d mlflow
 
-      - name: Wait for MLflow to be ready
+      - name: Wait for MLflow
         run: |
-          while ! nc -z mlflow 5000; do sleep 1; done
+          timeout 60 bash -c '
+            until curl -fsS http://localhost:5000 > /dev/null; do
+              sleep 2
+            done
+          '
 
-      - name: Check MLflow Accessibility
-        run: |
-          curl -s http://mlflow:5000
-
-      - name: Validate MLflow Container
+      - name: Verify MLflow Container
         run: |
           docker compose ps
+          docker compose logs mlflow --tail=50
 
-      - name: Test Network Connectivity
+      - name: Validate Docker Network
         run: |
-          docker compose exec train-logreg ping -c 4 mlflow
+          docker compose run --rm train-logreg \
+          python -c "
+            import requests
+            r=requests.get('http://mlflow:5000')
+            print('MLflow status:', r.status_code)
+            assert r.status_code == 200
+            "
 
-      - name: Run MLflow Logging Script
+      - name: Train Logistic Regression
         run: |
-          python -m src.mlflow_logging
+          docker compose run --rm train-logreg
 
-      - name: Stop Services
+      - name: Verify Model Artifact
+        run: |
+          ls -la models
+          test -f models/logreg.pkl
+
+      - name: Evaluate Logistic Regression
+        run: |
+          docker compose run --rm evaluate-logreg
+
+      - name: Verify Evaluation Artifacts
+        run: |
+          ls -la artifacts/logreg
+
+          test -f artifacts/logreg/roc_curve.png
+          test -f artifacts/logreg/pr_curve.png
+          test -f artifacts/logreg/confusion_matrix.png
+          test -f artifacts/logreg/classification_report.txt
+          test -f artifacts/logreg/predictions.csv
+
+      - name: Display MLflow Logs
         if: always()
         run: |
-          docker compose down --remove-orphans
+          docker compose logs mlflow --tail=200
 
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down -v --remove-orphans
