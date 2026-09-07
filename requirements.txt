@@ -9,3 +9,5 @@ pytest
 ruff==0.16.6
 python-dotenv
 joblib
+setuptools>=78.1.1
+msgpack>=1.2.1
