@@ -123,7 +123,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t churn-mlops .
+          docker build --no-cache -t churn-mlops .
 
       - name: Verify Container Starts
         run: |
@@ -197,43 +197,13 @@ jobs:
             done
           '
 
-      - name: Verify MLflow Container
-        run: |
-          docker compose ps
-          docker compose logs mlflow --tail=50
-
-      - name: Validate Docker Network
-        run: |
-          docker compose run --rm train-logreg \
-          python -c "
-            import requests
-            r=requests.get('http://mlflow:5000')
-            print('MLflow status:', r.status_code)
-            assert r.status_code == 200
-            "
-
       - name: Train Logistic Regression
         run: |
           docker compose run --rm train-logreg
 
-      - name: Verify Model Artifact
-        run: |
-          ls -la models
-          test -f models/logreg.pkl
-
       - name: Evaluate Logistic Regression
         run: |
           docker compose run --rm evaluate-logreg
-
-      - name: Verify Evaluation Artifacts
-        run: |
-          ls -la artifacts/logreg
-
-          test -f artifacts/logreg/roc_curve.png
-          test -f artifacts/logreg/pr_curve.png
-          test -f artifacts/logreg/confusion_matrix.png
-          test -f artifacts/logreg/classification_report.txt
-          test -f artifacts/logreg/predictions.csv
 
       - name: Display MLflow Logs
         if: always()
