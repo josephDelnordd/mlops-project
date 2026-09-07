@@ -2,9 +2,7 @@ import argparse
 import os
 
 import joblib
-import mlflow
 import mlflow.sklearn
-
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import (
     GridSearchCV,
@@ -12,6 +10,7 @@ from sklearn.model_selection import (
     train_test_split,
 )
 
+import mlflow
 from src.pipeline import build_pipeline
 from src.utils import (
     load_config,
@@ -25,9 +24,8 @@ def main(config_path: str):
 
     mlflow.set_tracking_uri(
         os.getenv(
-            "MLFLOW_TRACKING_URI",
-            "http://localhost:5000",
-        )
+            "MLFLOW_TRACKING_URI"
+            )
     )
 
     mlflow.set_experiment(
