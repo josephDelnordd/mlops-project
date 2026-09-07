@@ -1,9 +1,12 @@
+import argparse
 import os
 from pathlib import Path
 
 import joblib
 import matplotlib.pyplot as plt
+import mlflow
 import pandas as pd
+
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     PrecisionRecallDisplay,
@@ -13,9 +16,11 @@ from sklearn.metrics import (
     f1_score,
     roc_auc_score,
 )
-from sklearn.model_selection import train_test_split
 
-import mlflow
+from sklearn.model_selection import (
+    train_test_split,
+)
+
 from src.utils import (
     load_config,
     load_data,
@@ -197,3 +202,16 @@ def main(config_path: str):
     print(f"Accuracy : {accuracy:.4f}")
 
     print(f"F1 Score : {f1:.4f}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--config",
+        required=True,
+        type=str,
+    )
+
+    args = parser.parse_args()
+
+    main(args.config)
