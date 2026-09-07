@@ -57,7 +57,7 @@ mlops-project/
 - Accuracy : **0.7928**
 - F1 Score : **0.5350**
 
-**Meilleur modèle : Random Forest**
+**Meilleur modèle :** Random Forest
 
 ---
 
@@ -73,7 +73,7 @@ mlops-project/
 
 ---
 
-🧰 Prérequis
+## 🧰 Prérequis
 
 - Docker et Docker Compose installés
 - Python 3.12
@@ -109,7 +109,7 @@ make up
 
 ---
 
-🧪 Exécution des tests
+## 🧪 Exécution des tests
 
 ```bash
 make test
@@ -142,10 +142,9 @@ make train-random-forest
 
 Les modèles entraînés sont sauvegardés dans le répertoire `models/`.
 
-
 ---
 
-## Évaluation
+## 📊 Évaluation
 
 ### Logistic Regression
 
@@ -212,6 +211,7 @@ Le projet intègre des outils de qualité et de sécurité :
 ---
 
 ## 📄 Licence
+
 Ce projet est sous licence MIT.
 
 ---
