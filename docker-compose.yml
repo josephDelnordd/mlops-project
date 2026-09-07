@@ -19,76 +19,59 @@ services:
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
-
     container_name: mlflow
-
     ports:
       - "5000:5000"
-
-    environment:
-      MLFLOW_SERVER_ALLOWED_HOSTS: "*"
-
     command: >
       mlflow server
       --backend-store-uri sqlite:///mlflow/mlflow.db
       --default-artifact-root /mlflow/artifacts
       --host 0.0.0.0
       --port 5000
-
     volumes:
       - ./mlflow:/mlflow
-
-
+    environment:
+      MLFLOW_SERVER_ALLOWED_HOSTS: "*"
 
   train-logreg:
     <<: *common
     depends_on:
       - mlflow
-
     command: >
       python -m src.train
       --config configs/logreg.yaml
-
 
   train-random-forest:
     <<: *common
     depends_on:
       - mlflow
-
     command: >
       python -m src.train
       --config configs/random_forest.yaml
-
 
   evaluate-logreg:
     <<: *common
     depends_on:
       - mlflow
-
     command: >
       python -m src.evaluate
       --config configs/logreg.yaml
-
 
   evaluate-random-forest:
     <<: *common
     depends_on:
       - mlflow
-
     command: >
       python -m src.evaluate
       --config configs/random_forest.yaml
-
 
   tests:
     <<: *common
     command: pytest -q
 
-
   lint:
     <<: *common
     command: ruff check .
-
 
   format:
     <<: *common

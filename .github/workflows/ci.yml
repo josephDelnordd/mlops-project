@@ -219,6 +219,10 @@ jobs:
         run: |
           docker compose ps
 
+      - name: Test Network Connectivity
+        run: |
+          docker compose exec train-logreg ping mlflow
+
       - name: Run MLflow Logging Script
         run: |
           python -m src.mlflow_logging
