@@ -64,6 +64,9 @@ rebuild:
 mlflow:
 	$(COMPOSE) up -d mlflow
 
+run-mlflow:
+	python -m src.mlflow_logging
+
 mlflow-logs:
 	$(COMPOSE) logs -f mlflow
 
