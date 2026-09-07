@@ -219,6 +219,10 @@ jobs:
         run: |
           docker compose ps
 
+      - name: Run MLflow Logging Script
+        run: |
+          python -m src.mlflow_logging
+
       - name: Stop Services
         if: always()
         run: |
