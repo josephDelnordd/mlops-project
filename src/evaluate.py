@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import joblib
 import matplotlib.pyplot as plt
+import mlflow
 import pandas as pd
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
@@ -14,11 +15,11 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from sklearn.model_selection import train_test_split
-import mlflow
 from src.utils import (
     load_config,
     load_data,
 )
+
 
 
 def create_artifact_directory(model_type: str) -> Path:

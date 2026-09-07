@@ -14,9 +14,9 @@ line-length = 88
 select = ["E", "F", "I"]
 
 [tool.ruff.lint]
-ignore = [
-    "F401",  # Unused import
-]
+select = ["E", "F", "I"]
+ignore = ["F401"]  # Ignorer les imports non utilisés
+
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]

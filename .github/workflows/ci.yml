@@ -54,10 +54,19 @@ jobs:
         run: |
           ruff --version
 
+      - name: Clean up
+        run: |
+          rm -rf /tmp/*
+          rm -rf ~/.cache/ruff/*
+
       - name: Ruff Diff
         run: |
           ruff check src/train.py --fix --diff
           ruff check src/evaluate.py --fix --diff
+
+      - name: Ruff Lint
+        run: |
+          ruff check src/train.py src/evaluate.py --output-format=github
 
       - name: Ruff Lint
         run: |
