@@ -235,7 +235,7 @@ jobs:
         run: |
           for i in {1..60}; do
 
-            if curl -sf http://mlflow:5000 >/dev/null; then
+            if curl -sf http://localhost:5000 >/dev/null; then
               echo "✅ MLflow is ready"
               exit 0
             fi
