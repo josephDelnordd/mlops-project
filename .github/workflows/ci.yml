@@ -192,13 +192,17 @@ jobs:
         run: |
           while ! nc -z mlflow 5000; do sleep 1; done
 
+      - name: Check MLflow Accessibility
+        run: |
+          curl -s http://mlflow:5000
+
       - name: Validate MLflow Container
         run: |
           docker compose ps
 
       - name: Test Network Connectivity
         run: |
-          docker compose exec train-logreg ping mlflow
+          docker compose exec train-logreg ping -c 4 mlflow
 
       - name: Run MLflow Logging Script
         run: |
@@ -208,3 +212,4 @@ jobs:
         if: always()
         run: |
           docker compose down --remove-orphans
+
