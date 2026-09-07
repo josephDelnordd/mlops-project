@@ -174,32 +174,31 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Create Required Directories
+      - name: Create Directories
         run: |
           mkdir -p data
           mkdir -p models
           mkdir -p artifacts
 
-      - name: Add Dummy Data File
+      - name: Download Dummy Data File from Kaggle
         run: |
           mkdir -p data
-          echo "feature1,feature2,label" > data/raw.csv
-          echo "0,0,0" >> data/raw.csv
-          echo "1,1,1" >> data/raw.csv
+          wget https://www.kaggle.com/code/tysonpo/telco-customer-churn-prediction/data -O data/raw.csv
 
-      - name: Build Compose Services
+      - name: Build Services
         run: |
           docker compose build
 
-      - name: Start MLflow
+      - name: Start All Services
         run: |
-          docker compose up -d mlflow
+          docker compose up -d mlflow train-logreg
 
-      - name: Wait for MLflow
+      - name: Wait for MLflow to be ready
         run: |
           timeout 60 bash -c '
-            until curl -fsS http://localhost:5000 > /dev/null; do
-              sleep 2
+            while ! nc -z mlflow 5000; do
+              echo "Waiting for MLflow to be ready..."
+              sleep 1
             done
           '
 
@@ -207,32 +206,19 @@ jobs:
         run: |
           curl -s http://mlflow:5000
 
-      - name: Train Logistic Regression
+      - name: Validate MLflow Container
         run: |
-          docker compose run --rm train-logreg
+          docker compose ps
 
-      - name: Train Random Forest
+      - name: Test Network Connectivity
         run: |
-          docker compose run --rm train-rf
-
-      - name: Evaluate Logistic Regression
-        run: |
-          docker compose run --rm evaluate-logreg
-
-      - name: Evaluate Random Forest
-        run: |
-          docker compose run --rm evaluate-rf
+          docker compose exec train-logreg ping -c 4 mlflow
 
       - name: Run MLflow Logging Script
         run: |
           python -m src.mlflow_logging
 
-      - name: Display MLflow Logs
+      - name: Stop Services
         if: always()
         run: |
-          docker compose logs mlflow --tail=200
-
-      - name: Cleanup
-        if: always()
-        run: |
-          docker compose down -v --remove-orphans
+          docker compose down --remove-orphans
