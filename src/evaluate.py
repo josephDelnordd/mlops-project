@@ -36,11 +36,7 @@ def main(config_path: str):
     model_type = cfg["model"]["type"]
 
     # Configurer MLflow
-    mlflow.set_tracking_uri(
-        os.getenv(
-            "MLFLOW_TRACKING_URI"
-        )
-    )
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
     mlflow.set_experiment("evaluation")
 
     # Créer le répertoire d'artefacts
