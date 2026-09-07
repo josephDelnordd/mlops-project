@@ -1,7 +1,9 @@
 # src/mlflow_logging.py
-import mlflow
 import os
 from pathlib import Path
+
+import mlflow
+
 
 def log_experiment():
     # Définir le nom de l'expérience
