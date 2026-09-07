@@ -21,11 +21,7 @@ def main(config_path: str):
 
     cfg = load_config(config_path)
 
-    mlflow.set_tracking_uri(
-        os.getenv(
-            "MLFLOW_TRACKING_URI"
-            )
-    )
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
 
     mlflow.set_experiment(
         os.getenv(
