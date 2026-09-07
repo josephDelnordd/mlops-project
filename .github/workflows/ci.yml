@@ -174,16 +174,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Create Directories
+      - name: Set Up Kaggle CLI
         run: |
-          mkdir -p data
-          mkdir -p models
-          mkdir -p artifacts
+          pip install kaggle
+          mkdir -p ~/.kaggle
+          cp .github/kaggle.json ~/.kaggle/kaggle.json
+          chmod 600 ~/.kaggle/kaggle.json
 
-      - name: Download Dummy Data File from Kaggle
+      - name: Download Data Using Kaggle CLI
         run: |
           mkdir -p data
-          wget https://www.kaggle.com/code/tysonpo/telco-customer-churn-prediction/data -O data/raw.csv
+          kaggle datasets download tysonpo/telco-customer-churn-prediction -p data
+
+      - name: Extract Data
+        run: |
+          cd data
+          unzip telco-customer-churn-prediction.zip
+          mv Telco-Customer-Churn.csv raw.csv
+          cd ..
 
       - name: Build Services
         run: |
@@ -195,7 +203,7 @@ jobs:
 
       - name: Wait for MLflow to be ready
         run: |
-          timeout 60 bash -c '
+          timeout 120 bash -c '
             while ! nc -z mlflow 5000; do
               echo "Waiting for MLflow to be ready..."
               sleep 1

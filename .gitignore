@@ -17,3 +17,6 @@ __pycache__/
 
 # Environnement virtuel
 .venv/
+
+# Kaggle API key
+kaggle.json
