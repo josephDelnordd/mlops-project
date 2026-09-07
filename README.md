@@ -90,6 +90,12 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 pip install -e .
+
+# Build le projet avec Docker
+make build
+
+# Lancer le conteneur Docker
+make
 ```
 
 ---

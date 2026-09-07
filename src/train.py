@@ -2,7 +2,6 @@ import argparse
 import os
 
 import joblib
-import mlflow
 import mlflow.sklearn
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import (
@@ -11,6 +10,7 @@ from sklearn.model_selection import (
     train_test_split,
 )
 
+import mlflow
 from src.pipeline import build_pipeline
 from src.utils import (
     load_config,
@@ -18,9 +18,23 @@ from src.utils import (
 )
 
 
-def main(config_path):
+def main(config_path: str):
 
     cfg = load_config(config_path)
+
+    mlflow.set_tracking_uri(
+        os.getenv(
+            "MLFLOW_TRACKING_URI",
+            "http://localhost:5000",
+        )
+    )
+
+    mlflow.set_experiment(
+        os.getenv(
+            "MLFLOW_EXPERIMENT_NAME",
+            "churn-exp",
+        )
+    )
 
     df = load_data(cfg["data"]["csv_path"])
 
@@ -43,9 +57,6 @@ def main(config_path):
         stratify=y,
     )
 
-    print("\nTypes numériques :")
-    print(X_train[cfg["features"]["numeric"]].dtypes)
-
     pipeline = build_pipeline(
         cfg["features"]["numeric"],
         cfg["features"]["categorical"],
@@ -58,11 +69,11 @@ def main(config_path):
         random_state=42,
     )
 
-    mlflow.set_experiment("churn-exp")
-
     mlflow.sklearn.autolog()
 
-    with mlflow.start_run():
+    model_type = cfg["model"]["type"]
+
+    with mlflow.start_run(run_name=f"train-{model_type}"):
         grid = GridSearchCV(
             estimator=pipeline,
             param_grid=cfg["model"]["params"],
@@ -79,11 +90,16 @@ def main(config_path):
 
         best_model = grid.best_estimator_
 
-        probs = best_model.predict_proba(X_test)[:, 1]
+        probabilities = best_model.predict_proba(X_test)[:, 1]
 
         auc = roc_auc_score(
             y_test,
-            probs,
+            probabilities,
+        )
+
+        mlflow.log_param(
+            "model_type",
+            model_type,
         )
 
         mlflow.log_metric(
@@ -91,13 +107,28 @@ def main(config_path):
             auc,
         )
 
-        os.makedirs("models", exist_ok=True)
+        os.makedirs(
+            "models",
+            exist_ok=True,
+        )
 
-        model_type = cfg["model"]["type"]
+        model_path = f"models/{model_type}.pkl"
 
-        joblib.dump(best_model, f"models/{model_type}.pkl")
+        # Sauvegarde locale
+        joblib.dump(
+            best_model,
+            model_path,
+        )
 
-        print(f"\nBest Params : {grid.best_params_}")
+        # Sauvegarde dans MLflow en tant qu'artefact
+        mlflow.log_artifact(
+            model_path,
+            artifact_path="model",
+        )
+
+        print(f"\nModel saved : {model_path}")
+
+        print(f"Best Params : {grid.best_params_}")
 
         print(f"ROC-AUC Test : {auc:.4f}")
 

@@ -1,4 +1,4 @@
-import argparse
+import os
 from pathlib import Path
 
 import joblib
@@ -17,6 +17,7 @@ from sklearn.model_selection import (
     train_test_split,
 )
 
+import mlflow
 from src.utils import (
     load_config,
     load_data,
@@ -26,13 +27,6 @@ from src.utils import (
 def create_artifact_directory(
     model_type: str,
 ) -> Path:
-    """
-    Create artifact directory.
-
-    Example:
-    artifacts/logreg/
-    artifacts/random_forest/
-    """
 
     artifact_dir = Path("artifacts") / model_type
 
@@ -44,154 +38,22 @@ def create_artifact_directory(
     return artifact_dir
 
 
-def save_roc_curve(
-    y_true,
-    probabilities,
-    output_path,
-):
-    RocCurveDisplay.from_predictions(
-        y_true,
-        probabilities,
-    )
-
-    plt.savefig(
-        output_path,
-        bbox_inches="tight",
-    )
-
-    plt.close()
-
-
-def save_pr_curve(
-    y_true,
-    probabilities,
-    output_path,
-):
-    PrecisionRecallDisplay.from_predictions(
-        y_true,
-        probabilities,
-    )
-
-    plt.savefig(
-        output_path,
-        bbox_inches="tight",
-    )
-
-    plt.close()
-
-
-def save_confusion_matrix(
-    y_true,
-    predictions,
-    output_path,
-):
-    ConfusionMatrixDisplay.from_predictions(
-        y_true,
-        predictions,
-    )
-
-    plt.savefig(
-        output_path,
-        bbox_inches="tight",
-    )
-
-    plt.close()
-
-
-def save_classification_report(
-    y_true,
-    predictions,
-    output_path,
-):
-    report = classification_report(
-        y_true,
-        predictions,
-    )
-
-    with open(
-        output_path,
-        "w",
-        encoding="utf-8",
-    ) as file:
-        file.write(report)
-
-    return report
-
-
-def save_predictions(
-    y_true,
-    predictions,
-    probabilities,
-    output_path,
-):
-    results = pd.DataFrame(
-        {
-            "actual": y_true,
-            "prediction": predictions,
-            "probability": probabilities,
-        }
-    )
-
-    results.to_csv(
-        output_path,
-        index=False,
-    )
-
-
-def evaluate_model(
-    model,
-    X_test,
-):
-    probabilities = (model.predict_proba(X_test))[:, 1]
-
-    predictions = model.predict(X_test)
-
-    return (
-        predictions,
-        probabilities,
-    )
-
-
-def print_metrics(
-    y_test,
-    predictions,
-    probabilities,
-):
-    roc_auc = roc_auc_score(
-        y_test,
-        probabilities,
-    )
-
-    accuracy = accuracy_score(
-        y_test,
-        predictions,
-    )
-
-    f1 = f1_score(
-        y_test,
-        predictions,
-    )
-
-    print("\n========== Metrics ==========")
-
-    print(f"ROC-AUC : {roc_auc:.4f}")
-
-    print(f"Accuracy : {accuracy:.4f}")
-
-    print(f"F1 Score : {f1:.4f}")
-
-
-def main(
-    config_path: str,
-):
+def main(config_path: str):
 
     cfg = load_config(config_path)
 
     model_type = cfg["model"]["type"]
 
-    artifact_dir = create_artifact_directory(model_type)
+    mlflow.set_tracking_uri(
+        os.getenv(
+            "MLFLOW_TRACKING_URI",
+            "http://localhost:5000",
+        )
+    )
 
-    print(f"\nArtifacts directory: {artifact_dir}")
+    mlflow.set_experiment("evaluation")
+
+    artifact_dir = create_artifact_directory(model_type)
 
     df = load_data(cfg["data"]["csv_path"])
 
@@ -219,73 +81,121 @@ def main(
         stratify=y,
     )
 
-    model_path = Path("models") / f"{model_type}.pkl"
+    model = joblib.load(f"models/{model_type}.pkl")
 
-    model = joblib.load(model_path)
+    probabilities = model.predict_proba(X_test)[:, 1]
 
-    (
-        predictions,
-        probabilities,
-    ) = evaluate_model(
-        model,
-        X_test,
-    )
+    predictions = model.predict(X_test)
 
-    save_roc_curve(
+    # ROC Curve
+    RocCurveDisplay.from_predictions(
         y_test,
         probabilities,
-        artifact_dir / "roc_curve.png",
     )
 
-    save_pr_curve(
-        y_test,
-        probabilities,
-        artifact_dir / "pr_curve.png",
-    )
+    plt.savefig(artifact_dir / "roc_curve.png")
 
-    save_confusion_matrix(
-        y_test,
-        predictions,
-        artifact_dir / "confusion_matrix.png",
-    )
+    plt.close()
 
-    report = save_classification_report(
+    # Precision Recall Curve
+    PrecisionRecallDisplay.from_predictions(
         y_test,
-        predictions,
-        artifact_dir / "classification_report.txt",
-    )
-
-    save_predictions(
-        y_test,
-        predictions,
-        probabilities,
-        artifact_dir / "predictions.csv",
-    )
-
-    print(report)
-
-    print_metrics(
-        y_test,
-        predictions,
         probabilities,
     )
 
-    print("\nGenerated files:")
+    plt.savefig(artifact_dir / "pr_curve.png")
 
-    for file in sorted(artifact_dir.iterdir()):
-        print(f"  - {file.name}")
+    plt.close()
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=("Evaluate churn model"))
-
-    parser.add_argument(
-        "--config",
-        required=True,
-        type=str,
-        help="Path to YAML config",
+    # Confusion Matrix
+    ConfusionMatrixDisplay.from_predictions(
+        y_test,
+        predictions,
     )
 
-    args = parser.parse_args()
+    plt.savefig(artifact_dir / "confusion_matrix.png")
 
-    main(args.config)
+    plt.close()
+
+    # Classification Report
+    report = classification_report(
+        y_test,
+        predictions,
+    )
+
+    report_path = artifact_dir / "classification_report.txt"
+
+    with open(
+        report_path,
+        "w",
+        encoding="utf-8",
+    ) as file:
+        file.write(report)
+
+    # Predictions
+    predictions_path = artifact_dir / "predictions.csv"
+
+    pd.DataFrame(
+        {
+            "actual": y_test,
+            "prediction": predictions,
+            "probability": probabilities,
+        }
+    ).to_csv(
+        predictions_path,
+        index=False,
+    )
+
+    roc_auc = roc_auc_score(
+        y_test,
+        probabilities,
+    )
+
+    accuracy = accuracy_score(
+        y_test,
+        predictions,
+    )
+
+    f1 = f1_score(
+        y_test,
+        predictions,
+    )
+
+    with mlflow.start_run(run_name=f"eval-{model_type}"):
+        mlflow.log_param(
+            "model_type",
+            model_type,
+        )
+
+        mlflow.log_metric(
+            "roc_auc",
+            roc_auc,
+        )
+
+        mlflow.log_metric(
+            "accuracy",
+            accuracy,
+        )
+
+        mlflow.log_metric(
+            "f1_score",
+            f1,
+        )
+
+        mlflow.log_artifact(artifact_dir / "roc_curve.png")
+
+        mlflow.log_artifact(artifact_dir / "pr_curve.png")
+
+        mlflow.log_artifact(artifact_dir / "confusion_matrix.png")
+
+        mlflow.log_artifact(report_path)
+
+        mlflow.log_artifact(predictions_path)
+
+    print("\n========== Metrics ==========")
+
+    print(f"ROC-AUC : {roc_auc:.4f}")
+
+    print(f"Accuracy : {accuracy:.4f}")
+
+    print(f"F1 Score : {f1:.4f}")
