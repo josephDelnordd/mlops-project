@@ -179,7 +179,13 @@ jobs:
           mkdir -p data
           mkdir -p models
           mkdir -p artifacts
-          mkdir -p mlflow
+
+      - name: Add Dummy Data File
+        run: |
+          mkdir -p data
+          echo "feature1,feature2,label" > data/raw.csv
+          echo "0,0,0" >> data/raw.csv
+          echo "1,1,1" >> data/raw.csv
 
       - name: Build Compose Services
         run: |
@@ -197,13 +203,29 @@ jobs:
             done
           '
 
+      - name: Check MLflow Accessibility
+        run: |
+          curl -s http://mlflow:5000
+
       - name: Train Logistic Regression
         run: |
           docker compose run --rm train-logreg
 
+      - name: Train Random Forest
+        run: |
+          docker compose run --rm train-rf
+
       - name: Evaluate Logistic Regression
         run: |
           docker compose run --rm evaluate-logreg
+
+      - name: Evaluate Random Forest
+        run: |
+          docker compose run --rm evaluate-rf
+
+      - name: Run MLflow Logging Script
+        run: |
+          python -m src.mlflow_logging
 
       - name: Display MLflow Logs
         if: always()
