@@ -163,6 +163,16 @@ Les résultats d'évaluation (métriques, courbes ROC, PR, confusion matrices, e
 
 ---
 
+## ⚡ Entraînement & évaluation rapides
+
+```bash
+make build
+make up
+make all
+```
+
+---
+
 ## 📦 MLflow Tracking
 
 MLflow est utilisé pour suivre les expériences et enregistrer les artefacts. Les logs et les métriques sont disponibles via l'interface web de MLflow.
