@@ -10,14 +10,15 @@ on:
     branches:
       - main
       - develop
+
 permissions:
   contents: read
 
 jobs:
 
-  quality:
+  code_quality:
 
-    name: Code Quality & Tests
+    name: Code Quality Checks & Unit Tests
 
     runs-on: ubuntu-latest
 
@@ -62,13 +63,13 @@ jobs:
         run: |
           pytest -q
 
-  security:
+  dependency_security:
 
-    name: Dependency Security Scan
+    name: Dependency Vulnerability Scan
 
     runs-on: ubuntu-latest
 
-    needs: quality
+    needs: code_quality
 
     steps:
 
@@ -89,13 +90,13 @@ jobs:
         run: |
           pip-audit -r requirements.txt
 
-  secrets:
+  secret_scan:
 
-    name: Secret Scan
+    name: Secret Detection Scan
 
     runs-on: ubuntu-latest
 
-    needs: quality
+    needs: code_quality
 
     steps:
 
@@ -105,15 +106,15 @@ jobs:
       - name: Gitleaks Scan
         uses: gitleaks/gitleaks-action@v2
 
-  docker:
+  docker_build:
 
-    name: Docker Build Validation
+    name: Docker Image Build & Validation
 
     runs-on: ubuntu-latest
 
     needs:
-      - security
-      - secrets
+      - dependency_security
+      - secret_scan
 
     steps:
 
@@ -128,11 +129,14 @@ jobs:
         run: |
           docker run --rm churn-mlops python --version
 
-  compose:
+  docker_compose:
 
-    name: Docker Compose Validation
+    name: Docker Compose Services Validation
 
     runs-on: ubuntu-latest
+
+    needs:
+      - docker_build
 
     steps:
 
@@ -156,14 +160,14 @@ jobs:
         run: |
           docker compose down --remove-orphans
 
-  mlops:
+  mlops_validation:
 
-    name: MLOps Validation
+    name: MLOps Infrastructure Validation
 
     runs-on: ubuntu-latest
 
     needs:
-      - compose
+      - docker_compose
 
     steps:
 
