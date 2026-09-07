@@ -149,8 +149,8 @@ jobs:
       - name: Install Trivy
         run: |
           # Télécharge la dernière version de Trivy
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz
-          tar -xvf trivy_$(uname -s)_$(uname -m).tar.gz
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.74.0/trivy_Linux_x86_64.tar.gz
+          tar -xvf trivy_Linux_x86_64.tar.gz
           sudo mv trivy /usr/local/bin/
 
       - name: Trivy Scan
@@ -159,6 +159,7 @@ jobs:
             --ignore-severity HIGH,Critical \
             --severity CRITICAL,HIGH \
             --format table
+
 
   compose:
 
