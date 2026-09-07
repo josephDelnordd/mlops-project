@@ -6,6 +6,6 @@ seaborn
 mlflow
 pyyaml
 pytest
-ruff
+ruff==0.16.6
 python-dotenv
 joblib

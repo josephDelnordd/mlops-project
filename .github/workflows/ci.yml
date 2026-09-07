@@ -50,7 +50,12 @@ jobs:
           head -25 src/evaluate.py
 
       - name: Ruff Version
-        run: ruff --version
+        run: |
+          ruff --version
+
+      - name: Pip Freeze
+        run: |
+          pip freeze | grep ruff
 
       - name: Ruff Diff
         run: |
