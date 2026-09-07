@@ -49,6 +49,14 @@ jobs:
           echo "===== EVALUATE ====="
           head -25 src/evaluate.py
 
+      - name: Ruff Version
+        run: ruff --version
+
+      - name: Ruff Diff
+        run: |
+          ruff check src/train.py --fix --diff
+          ruff check src/evaluate.py --fix --diff
+
       - name: Ruff Lint
         run: |
           ruff check . --output-format=github
