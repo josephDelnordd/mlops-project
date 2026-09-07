@@ -223,7 +223,12 @@ jobs:
         run: |
           python -m src.mlflow_logging
 
+      - name: Check MLflow Access
+        run: |
+          curl http://localhost:5000
+
       - name: Stop Services
         if: always()
         run: |
           docker compose down --remove-orphans
+
