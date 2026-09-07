@@ -77,8 +77,3 @@ services:
     <<: *common
     command: >
       sh -c "ruff check . --fix && ruff format ."
-
-networks:
-  default:
-    external:
-      name: mlops-project_default
