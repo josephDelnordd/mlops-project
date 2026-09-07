@@ -184,9 +184,13 @@ jobs:
         run: |
           docker compose build
 
-      - name: Start MLflow
+      - name: Start All Services
         run: |
-          docker compose up -d mlflow
+          docker compose up -d mlflow train-logreg
+
+      - name: Wait for MLflow to be ready
+        run: |
+          while ! nc -z mlflow 5000; do sleep 1; done
 
       - name: Validate MLflow Container
         run: |
