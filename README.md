@@ -1,4 +1,4 @@
-# Churn Classifier with MLOps
+# 🚀 Churn Classifier with MLOps
 
 Projet de classification du churn client basé sur le dataset **Telco Customer Churn**.
 
@@ -16,7 +16,7 @@ L'objectif est de mettre en œuvre un pipeline Machine Learning reproductible av
 
 ---
 
-## Architecture
+## 📦 Architecture
 
 ```text
 mlops-project/
@@ -30,6 +30,7 @@ mlops-project/
 ├── src
 │   ├── evaluate.py
 │   ├── feature_importance.py
+│   ├── mlflow_logging.py
 │   ├── pipeline.py
 │   ├── train.py
 │   └── utils.py
@@ -44,7 +45,7 @@ mlops-project/
 
 ---
 
-## Modèles
+## 🧠 Modèles
 
 ### Logistic Regression
 
@@ -60,19 +61,27 @@ mlops-project/
 
 ---
 
-## Fonctionnalités
+## 🛠 Fonctionnalités
 
 - Prétraitement automatique des données
 - Encodage des variables catégorielles
 - Normalisation des variables numériques
 - Validation croisée (StratifiedKFold)
 - Optimisation des hyperparamètres (GridSearchCV)
-- Suivi des expériences avec MLflow
+- Suivi des expériences avec **MLflow**
 - Génération automatique des artefacts d'évaluation
 
 ---
 
-## Installation
+🧰 Prérequis
+
+- Docker et Docker Compose installés
+- Python 3.12
+- Outils nécessaires : pip, pytest, ruff
+
+---
+
+## ✅ Installation
 
 ```bash
 # Cloner le dépôt et se placer dans le répertoire du projet
@@ -95,12 +104,29 @@ pip install -e .
 make build
 
 # Lancer le conteneur Docker
-make
+make up
 ```
 
 ---
 
-## Entraînement
+🧪 Exécution des tests
+
+```bash
+make test
+```
+
+---
+
+## 🛠 Linting et formatage du code
+
+```bash
+make format
+make lint
+```
+
+---
+
+## 🧬 Entraînement des modèles
 
 ### Logistic Regression
 
@@ -113,6 +139,9 @@ make train-logreg
 ```bash
 make train-random-forest
 ```
+
+Les modèles entraînés sont sauvegardés dans le répertoire `models/`.
+
 
 ---
 
@@ -130,69 +159,53 @@ make evaluate-logreg
 make evaluate-random-forest
 ```
 
-Les résultats sont générés dans :
+Les résultats d'évaluation (métriques, courbes ROC, PR, confusion matrices, etc.) sont générés dans le répertoire `artifacts/`.
 
-```text
-artifacts/
-├── logreg/
-└── random_forest/
+---
+
+## 📦 MLflow Tracking
+
+MLflow est utilisé pour suivre les expériences et enregistrer les artefacts. Les logs et les métriques sont disponibles via l'interface web de MLflow.
+
+---
+
+## 🖥 Accès à MLflow
+
+Ouvrez votre navigateur et rendez-vous à l'adresse :
+
+```bash
+http://localhost:5000
 ```
 
 ---
 
-## Qualité
+## 🧹 Nettoyage
 
-Tests :
-
-```bash
-make test
-```
-
-Lint :
+Pour arrêter et supprimer tous les conteneurs et volumes :
 
 ```bash
-make lint
-```
-
-Formatage :
-
-```bash
-make format
+make down
 ```
 
 ---
 
-## Docker
+## 🧪 Qualité et Sécurité
 
-Build :
+Le projet intègre des outils de qualité et de sécurité :
 
-```bash
-make build
-```
-
-Train :
-
-```bash
-make train-logreg
-make train-random-forest
-
-```
-
-Évaluation :
-
-```bash
-make evaluate-random-forest
-make evaluate-logreg
-```
+- **Pytest :** Tests unitaires et fonctionnels.
+- **Ruff :** Linting et formatage du code.
+- **GitHub Actions :** CI/CD automatisé.
+- **pip-audit :** Vérification des vulnérabilités des dépendances.
+- **Trivy :** Analyse des images Docker pour les vulnérabilités.
 
 ---
 
-## CI/CD & Sécurité
+## 📄 Licence
+Ce projet est sous licence MIT.
 
-Le pipeline GitHub Actions exécute automatiquement :
+---
 
-- Ruff
-- Pytest
-- Build Docker
-- pip-audit
+## 🧑‍💻 Auteur
 
+Ce projet a été développé par Joseph DELNORD.
