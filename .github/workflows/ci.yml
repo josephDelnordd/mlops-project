@@ -10,7 +10,7 @@ on:
     branches:
       - main
       - develop
-
+# permissions for the workflow
 permissions:
   contents: read
 
