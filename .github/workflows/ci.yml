@@ -24,7 +24,6 @@ jobs:
 
     steps:
 
-
       - name: Clean up
         run: |
           rm -rf /tmp/* || true
@@ -63,7 +62,6 @@ jobs:
       - name: Ruff Lint
         run: |
           ruff check src/train.py src/evaluate.py --output-format=github
-
 
       - name: Ruff Format Validation
         run: |
@@ -232,4 +230,4 @@ jobs:
       - name: Stop Services
         if: always()
         run: |
-          docker compose down --remove-orphans
+          docker compose down --remove-ors

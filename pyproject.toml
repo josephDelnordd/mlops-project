@@ -1,5 +1,3 @@
-# pyproject.toml
-
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
@@ -13,9 +11,12 @@ where = ["."]
 
 [tool.ruff]
 line-length = 88
+select = ["E", "F", "I"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+ignore = [
+    "F401",  # Unused import
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
