@@ -27,11 +27,7 @@ jobs:
 
       - name: Clean up
         run: |
-          for file in /tmp/*; do
-            if [ -e "$file" ]; then
-              rm -rf "$file"
-            fi
-          done
+          rm -rf /tmp/* || true
 
       - name: Checkout Repository
         uses: actions/checkout@v4
