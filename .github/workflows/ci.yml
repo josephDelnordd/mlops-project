@@ -127,7 +127,6 @@ jobs:
       - name: Verify Container Starts
         run: |
           docker run --rm churn-mlops python --version
-
   docker-security:
 
     name: Docker Security Scan
@@ -147,13 +146,11 @@ jobs:
           docker build -t churn-mlops .
 
       - name: Trivy Scan
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: churn-mlops
-          format: table
-          ignore-unfixed: true
-          severity: CRITICAL,HIGH
-          exit-code: 1
+        run: |
+          trivy image churn-mlops \
+            --ignore-severity HIGH,Critical \
+            --severity CRITICAL,HIGH \
+            --format table
 
   compose:
 

@@ -1,0 +1,7 @@
+artifacts
+configs
+data
+mlflow
+models
+src
+tests
