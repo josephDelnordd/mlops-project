@@ -71,14 +71,30 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Security Tools
+      - name: Install pip-audit
         run: |
           python -m pip install --upgrade pip
           pip install pip-audit
 
-      - name: Audit Python Dependencies
+      - name: Audit Dependencies
         run: |
           pip-audit -r requirements.txt
+
+  secrets:
+
+    name: Secret Scan
+
+    runs-on: ubuntu-latest
+
+    needs: quality
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
 
   docker:
 
@@ -87,8 +103,8 @@ jobs:
     runs-on: ubuntu-latest
 
     needs:
-      - quality
       - security
+      - secrets
 
     steps:
 
@@ -103,9 +119,9 @@ jobs:
         run: |
           docker run --rm churn-mlops python --version
 
-  docker-compose:
+  docker-security:
 
-    name: Docker Compose Validation
+    name: Docker Security Scan
 
     runs-on: ubuntu-latest
 
@@ -117,15 +133,83 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Build Docker Image
+        run: |
+          docker build -t churn-mlops .
+
+      - name: Trivy Scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: churn-mlops
+          format: table
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
+  compose:
+
+    name: Docker Compose Validation
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - docker-security
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Dummy Dataset
+        run: |
+          mkdir -p data
+
       - name: Build Compose Services
         run: |
           docker compose build
 
-      - name: Validate Test Service
+      - name: Validate Tests Container
         run: |
           docker compose run --rm tests
 
       - name: Cleanup
+        if: always()
+        run: |
+          docker compose down --remove-orphans
+
+  mlops:
+
+    name: MLOps Validation
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - compose
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Directories
+        run: |
+          mkdir -p data
+          mkdir -p models
+          mkdir -p artifacts
+
+      - name: Build Services
+        run: |
+          docker compose build
+
+      - name: Start MLflow
+        run: |
+          docker compose up -d mlflow
+
+      - name: Validate MLflow Container
+        run: |
+          docker compose ps
+
+      - name: Stop Services
         if: always()
         run: |
           docker compose down --remove-orphans
