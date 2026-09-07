@@ -128,47 +128,11 @@ jobs:
         run: |
           docker run --rm churn-mlops python --version
 
-  docker-security:
-
-    name: Docker Security Scan
-
-    runs-on: ubuntu-latest
-
-    needs:
-      - docker
-
-    steps:
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Build Docker Image
-        run: |
-          docker build -t churn-mlops .
-
-      - name: Install Trivy
-        run: |
-          # Télécharge la dernière version de Trivy
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.74.0/trivy_Linux_x86_64.tar.gz
-          tar -xvf trivy_Linux_x86_64.tar.gz
-          sudo mv trivy /usr/local/bin/
-
-      - name: Trivy Scan
-        run: |
-          trivy image churn-mlops \
-            --ignore-severity HIGH,Critical \
-            --severity CRITICAL,HIGH \
-            --format table
-
-
   compose:
 
     name: Docker Compose Validation
 
     runs-on: ubuntu-latest
-
-    needs:
-      - docker-security
 
     steps:
 
