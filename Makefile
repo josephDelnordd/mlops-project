@@ -48,7 +48,7 @@ build:
 	$(COMPOSE) build --no-cache
 
 up:
-	$(COMPOSE) up -d
+	$(COMPOSE) up -d --build
 
 down:
 	$(COMPOSE) down --remove-orphans
@@ -133,3 +133,5 @@ all:
 
 	$(MAKE) train-random-forest
 	$(MAKE) evaluate-random-forest
+
+	$(MAKE) mlflow-stop
