@@ -10,7 +10,6 @@ from sklearn.model_selection import (
     train_test_split,
 )
 
-import mlflow
 from src.pipeline import build_pipeline
 from src.utils import (
     load_config,
