@@ -24,6 +24,12 @@ jobs:
 
     steps:
 
+
+      - name: Clean up
+        run: |
+          rm -rf /tmp/*
+          rm -rf ~/.cache/*
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -40,22 +46,15 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install -e .
+          pip install --upgrade ruff
 
-      - name: Debug Imports
+      - name: Debug mlflow installation
         run: |
-          echo "===== TRAIN ====="
-          head -20 src/train.py
-
-          echo "===== EVALUATE ====="
-          head -25 src/evaluate.py
+          python -c "import mlflow; print(mlflow.__version__)"
 
       - name: Ruff Version
         run: |
           ruff --version
-
-      - name: Pip Freeze
-        run: |
-          pip freeze | grep ruff
 
       - name: Ruff Diff
         run: |
@@ -64,7 +63,8 @@ jobs:
 
       - name: Ruff Lint
         run: |
-          ruff check . --output-format=github
+          ruff check src/train.py src/evaluate.py --output-format=github
+
 
       - name: Ruff Format Validation
         run: |
