@@ -2,7 +2,9 @@ import argparse
 import os
 
 import joblib
+import mlflow
 import mlflow.sklearn
+
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import (
     GridSearchCV,
@@ -10,7 +12,6 @@ from sklearn.model_selection import (
     train_test_split,
 )
 
-import mlflow
 from src.pipeline import build_pipeline
 from src.utils import (
     load_config,
