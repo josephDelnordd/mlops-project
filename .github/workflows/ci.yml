@@ -43,7 +43,7 @@ jobs:
 
       - name: Ruff Lint
         run: |
-          ruff check .
+          ruff check . --output-format=github
 
       - name: Ruff Format Validation
         run: |
