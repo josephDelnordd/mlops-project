@@ -40,11 +40,6 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
           pip install --upgrade ruff
-
-      - name: Debug mlflow installation
-        run: |
-          python -c "import mlflow; print(mlflow.__version__)"
-
       - name: Ruff Version
         run: |
           ruff --version
@@ -52,11 +47,6 @@ jobs:
       - name: Clean up
         run: |
           rm -rf /tmp/* || true
-
-      - name: Ruff Diff
-        run: |
-          ruff check src/train.py --fix --diff
-          ruff check src/evaluate.py --fix --diff
 
       - name: Ruff Lint
         run: |
