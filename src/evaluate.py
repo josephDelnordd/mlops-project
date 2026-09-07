@@ -38,8 +38,7 @@ def main(config_path: str):
     # Configurer MLflow
     mlflow.set_tracking_uri(
         os.getenv(
-            "MLFLOW_TRACKING_URI",
-            "http://localhost:5000",
+            "MLFLOW_TRACKING_URI"
         )
     )
     mlflow.set_experiment("evaluation")
