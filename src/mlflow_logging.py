@@ -1,7 +1,9 @@
 # src/mlflow_logging.py
-import mlflow
 import os
 from pathlib import Path
+
+import mlflow
+
 
 def log_experiment():
     # Définir le nom de l'expérience
@@ -25,6 +27,7 @@ def log_experiment():
             mlflow.sklearn.log_model(model_path, "random-forest-model")
         else:
             print(f"Model file not found: {model_path}")
+
 
 if __name__ == "__main__":
     log_experiment()
