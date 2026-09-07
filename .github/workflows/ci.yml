@@ -27,8 +27,11 @@ jobs:
 
       - name: Clean up
         run: |
-          rm -rf /tmp/*
-          rm -rf ~/.cache/*
+          for file in /tmp/*; do
+            if [ -e "$file" ]; then
+              rm -rf "$file"
+            fi
+          done
 
       - name: Checkout Repository
         uses: actions/checkout@v4
